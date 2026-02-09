@@ -3,47 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Full-Stack- App (Student Build)</title>
+    <title>Full-Stack App (Student Build)</title>
     
-    <!-- Boostrap 5 CSS-->
-     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-     rel="stylesheet">
-
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css">
-
+    <link rel="stylesheet" href="step-by-step-style.css">
 </head>
-<body>
+<body class="not-authenticated">
+    
     <!-- Navigation Bar -->
-     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
-
-            <!--left side: Brand/Logo-->
-            <a class="navbar-brand" href="#">Full-Stack App Gaviola</a>
-
-            <!--right side: Navigation Links-->
+            
+            <!-- Left side: Brand/Logo -->
+            <a class="navbar-brand" href="#">Full-Stack App (Your Full Name)</a>
+            
+            <!-- Right side: Navigation Links -->
             <ul class="navbar-nav ms-auto">
-                <li class-nav-item>
+                
+                <!-- These show when NOT logged in -->
+                <li class="nav-item role-logged-out">
                     <a class="nav-link" href="#">Login</a>
                 </li>
-                <li class-nav-item>
+                <li class="nav-item role-logged-out">
                     <a class="nav-link" href="#">Register</a>
                 </li>
-                <!-- This shows when logged in: with username -->
-                 <li class="nav-item dropdown">
+                
+                <!-- This shows when logged in: Dropdown with username -->
+                <li class="nav-item dropdown role-logged-in">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        username
+                        Username
                     </a>
-                    <!--dropdown menu-->
+                    <!-- Dropdown menu -->
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="#">Profile</a></li>
-                        <li><a class="dropdown-item" href="#">My Request</a></li>
+                        <li><a class="dropdown-item" href="#">My Requests</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="#">Logout</a></li>
                     </ul>
-                 </li>
-
-                 <!-- Admin-only links -->
+                </li>
+                
+                <!-- Admin-only links -->
                 <li class="nav-item role-admin">
                     <a class="nav-link" href="#">Employees</a>
                 </li>
@@ -53,15 +55,81 @@
                 <li class="nav-item role-admin">
                     <a class="nav-link" href="#">Departments</a>
                 </li>
+                
             </ul>
+            
         </div>
-     </nav>
+    </nav>
 
+    <!-- Main Content Area -->
+    <main class="container mt-4">
+        
+        <!-- Home Page -->
+        <section>
+            <h1>Welcome to Full-Stack App</h1>
+            <p class="text-muted">A static prototype before backend integration. Simulates:</p>
+            
+            <ul>
+                <li>Email registration + fake verification</li>
+                <li>Login with JWT-like token simulation</li>
+                <li>Role-based UI (Admin/User)</li>
+                <li>CRUD for Employees, Departments, Requests</li>
+            </ul>
+            
+            <div class="alert alert-info">
+                <strong>⚠️ Note:</strong> All data is stored in <code>localStorage</code>. Refresh to reset.
+            </div>
+            
+            <button class="btn btn-primary">Get Started →</button>
+        </section>
 
-     <!-- Bootsrap 5 JS Bundle -->
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-      <!-- Custom JS -->
-      <script src="script.js"></script>
+        <!-- Register Page -->
+         <Section id="register-page" class="page">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <h2>Rigister Account</h2>
+                    
+                    <form>
+                        <!--Firstname-->
+                        <div class="mb-3">
+                            <label for="first-name" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="firstname" required>
+                        </div>
+                        
+                        <!-- Last Name -->
+                        <div class="mb-3">
+                            <label for="last-name" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="last-name" required>
+                        </div>
+                        
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        
+                        <!-- Password -->
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        
+                        <!-- Buttons -->
+                        <button type="submit" class="btn btn-success">Sign Up</button>
+                        <button type="button" class="btn btn-outline-secondary ms-2">Cancel</button>
+                    </form>
+                </div>
+            </div>
+         </Section>
+        
+    </main>
+    
+    
+    
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="script.js"></script>
 </body>
 </html>

@@ -1,0 +1,70 @@
+/* ============================================
+   HOW THIS WORKS:
+   ============================================
+   
+   The <body> element will have different classes:
+   - "not-authenticated" = user is logged OUT
+   - "authenticated" = user is logged IN
+   - "is-admin" = user is an admin
+   
+   We use CSS to show/hide nav links based on these classes.
+*/
+
+
+/* ============================================
+   RULE 1: When user is NOT logged in
+   ============================================ */
+
+/* Hide the logged-in dropdown */
+body.not-authenticated .role-logged-in {
+    display: none;
+}
+
+/* Hide admin links */
+body.not-authenticated .role-admin {
+    display: none;
+}
+
+/* Show Login and Register (these are visible by default) */
+
+
+/* ============================================
+   RULE 2: When user IS logged in
+   ============================================ */
+
+/* Hide Login and Register buttons */
+body.authenticated .role-logged-out {
+    display: none;
+}
+
+/* Show the dropdown (it's visible by default) */
+
+/* Admin links are still hidden (unless user is admin) */
+.role-admin {
+    display: none;
+}
+
+
+/* ============================================
+   RULE 3: When user is an ADMIN
+   ============================================ */
+
+/* Show admin links */
+body.is-admin .role-admin {
+    display: block;
+}
+
+
+/* ============================================
+   EXTRA STYLING
+   ============================================ */
+
+/* Make the navbar brand bold */
+.navbar-brand {
+    font-weight: bold;
+}
+
+/* Add some spacing to main content */
+main {
+    margin-top: 20px;
+}
