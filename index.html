@@ -18,17 +18,17 @@
         <div class="container-fluid">
             
             <!-- Left side: Brand/Logo -->
-            <a class="navbar-brand" href="#">Full-Stack App Gaviola</a>
+            <a class="navbar-brand" href="#/">Full-Stack App Gaviola</a>
             
             <!-- Right side: Navigation Links -->
             <ul class="navbar-nav ms-auto">
                 
                 <!-- These show when NOT logged in -->
                 <li class="nav-item role-logged-out">
-                    <a class="nav-link" href="#">Login</a>
+                    <a class="nav-link" href="#/login">Login</a>
                 </li>
                 <li class="nav-item role-logged-out">
-                    <a class="nav-link" href="#">Register</a>
+                    <a class="nav-link" href="#/register">Register</a>
                 </li>
                 
                 <!-- This shows when logged in: Dropdown with username -->
@@ -38,8 +38,8 @@
                     </a>
                     <!-- Dropdown menu -->
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#">Profile</a></li>
-                        <li><a class="dropdown-item" href="#">My Requests</a></li>
+                        <li><a class="dropdown-item" href="#/profile">Profile</a></li>
+                        <li><a class="dropdown-item" href="#/requests">My Requests</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="#">Logout</a></li>
                     </ul>
@@ -47,13 +47,13 @@
                 
                 <!-- Admin-only links -->
                 <li class="nav-item role-admin">
-                    <a class="nav-link" href="#">Employees</a>
+                    <a class="nav-link" href="#/employees">Employees</a>
                 </li>
                 <li class="nav-item role-admin">
-                    <a class="nav-link" href="#">Accounts</a>
+                    <a class="nav-link" href="#/accounts">Accounts</a>
                 </li>
                 <li class="nav-item role-admin">
-                    <a class="nav-link" href="#">Departments</a>
+                    <a class="nav-link" href="#/departments">Departments</a>
                 </li>
                 
             </ul>
@@ -65,7 +65,7 @@
     <main class="container mt-4">
         
         <!-- Home Page -->
-        <section>
+        <section id="home-page" class="page active">
             <h1>Welcome to Full-Stack App</h1>
             <p class="text-muted">A static prototype before backend integration. Simulates:</p>
             
@@ -82,18 +82,18 @@
             
             <button class="btn btn-primary">Get Started →</button>
         </section>
-
+        
         <!-- Register Page -->
-         <Section id="register-page" class="page">
+        <section id="register-page" class="page">
             <div class="row justify-content-center">
                 <div class="col-md-6">
-                    <h2>Rigister Account</h2>
+                    <h2>Register Account</h2>
                     
                     <form>
-                        <!--Firstname-->
+                        <!-- First Name -->
                         <div class="mb-3">
                             <label for="first-name" class="form-label">First Name</label>
-                            <input type="text" class="form-control" id="firstname" required>
+                            <input type="text" class="form-control" id="first-name" required>
                         </div>
                         
                         <!-- Last Name -->
@@ -120,9 +120,9 @@
                     </form>
                 </div>
             </div>
-         </Section>
+        </section>
         
-         <!-- Verify Email Page -->
+        <!-- Verify Email Page -->
         <section id="verify-email-page" class="page">
             <div class="row justify-content-center">
                 <div class="col-md-6">
@@ -190,21 +190,14 @@
                 </div>
             </div>
         </section>
-
+        
         <!-- Profile Page -->
         <section id="profile-page" class="page">
             <h2>My Profile</h2>
             
-            <!-- Profile Card -->
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title" id="profile-name">Admin User</h5>
-                    <p class="card-text">
-                        <strong>Email:</strong> <span id="profile-email">admin@example.com</span><br>
-                        <strong>Role:</strong> <span id="profile-role">Admin</span>
-                    </p>
-                    <button class="btn btn-primary">Edit Profile</button>
-                </div>
+            <!-- This div will be filled by renderProfile() function -->
+            <div id="profile-content">
+                <p class="text-muted">Loading profile...</p>
             </div>
         </section>
         
@@ -213,6 +206,11 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2>Employees</h2>
                 <button class="btn btn-success" id="add-employee-btn">+ Add Employee</button>
+            </div>
+            
+            <!-- This div will be filled by renderEmployeesList() function -->
+            <div id="employees-content">
+                <p class="text-muted">Loading employees...</p>
             </div>
             
             <!-- Employees Table -->
@@ -284,7 +282,7 @@
                 </div>
             </div>
         </section>
-
+        
         <!-- Departments Page (Admin) -->
         <section id="departments-page" class="page">
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -292,46 +290,22 @@
                 <button class="btn btn-success" id="add-department-btn">+ Add Department</button>
             </div>
             
-            <!-- Departments Table -->
-            <div class="card">
-                <div class="card-body">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Description</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="departments-table-body">
-                            <!-- Example data (will be replaced by JavaScript later) -->
-                            <tr>
-                                <td>Engineering</td>
-                                <td>Software team</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-primary">Edit</button>
-                                    <button class="btn btn-sm btn-outline-danger ms-1">Delete</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>HR</td>
-                                <td>Human Resources</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-primary">Edit</button>
-                                    <button class="btn btn-sm btn-outline-danger ms-1">Delete</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <!-- This div will be filled by renderDepartmentsList() function -->
+            <div id="departments-content">
+                <p class="text-muted">Loading departments...</p>
             </div>
         </section>
-
+        
         <!-- Accounts Page (Admin) -->
         <section id="accounts-page" class="page">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2>Accounts</h2>
                 <button class="btn btn-success" id="add-account-btn">+ Add Account</button>
+            </div>
+            
+            <!-- This div will be filled by renderAccountsList() function -->
+            <div id="accounts-content">
+                <p class="text-muted">Loading accounts...</p>
             </div>
             
             <!-- Accounts Table -->
@@ -351,7 +325,7 @@
                             <!-- Example data -->
                             <tr>
                                 <td>Admin User</td>
-                                <td>admin@example.com</td>
+                                <td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3352575e5a5d73564b525e435f561d505c5e">[email&#160;protected]</a></td>
                                 <td>Admin</td>
                                 <td>✅</td>
                                 <td>
@@ -419,10 +393,69 @@
                 </div>
             </div>
         </section>
-
+        
+        <!-- Requests Page -->
+        <section id="requests-page" class="page">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2>My Requests</h2>
+                <button class="btn btn-success" id="new-request-btn" data-bs-toggle="modal" data-bs-target="#newRequestModal">+ New Request</button>
+            </div>
+            
+            <!-- Requests Table or Empty State -->
+            <div id="requests-content">
+                <p class="text-muted">You have no requests yet.</p>
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newRequestModal">Create One</button>
+            </div>
+        </section>
+        
     </main>
     
-    
+    <!-- New Request Modal -->
+    <div class="modal fade" id="newRequestModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">New Request</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="new-request-form">
+                        <!-- Type Dropdown -->
+                        <div class="mb-3">
+                            <label for="request-type" class="form-label">Type</label>
+                            <select class="form-select" id="request-type" required>
+                                <option value="Equipment">Equipment</option>
+                                <option value="Leave">Leave</option>
+                                <option value="Resources">Resources</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Items Section -->
+                        <div class="mb-3">
+                            <label class="form-label">Items</label>
+                            <div id="request-items-container">
+                                <!-- Item rows will be added here -->
+                                <div class="row mb-2 request-item">
+                                    <div class="col-7">
+                                        <input type="text" class="form-control" placeholder="Item name" required>
+                                    </div>
+                                    <div class="col-3">
+                                        <input type="number" class="form-control" value="1" min="1" required>
+                                    </div>
+                                    <div class="col-2">
+                                        <button type="button" class="btn btn-danger btn-sm remove-item-btn">×</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-success mt-2" id="add-item-btn">+ Add Item</button>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Submit Request</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
