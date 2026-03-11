@@ -4,413 +4,297 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Full-Stack App (Student Build)</title>
-    
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="not-authenticated">
-    
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" id="toast-container"></div>
+
+    <!-- ============================================
+         NAVIGATION BAR
+         ============================================ -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            
-            <!-- Left side: Brand/Logo -->
             <a class="navbar-brand" href="#/">Full-Stack App Gaviola</a>
-            
-            <!-- Right side: Navigation Links -->
-            <ul class="navbar-nav ms-auto">
-                
-                <!-- These show when NOT logged in -->
-                <li class="nav-item role-logged-out">
-                    <a class="nav-link" href="#/login">Login</a>
-                </li>
-                <li class="nav-item role-logged-out">
-                    <a class="nav-link" href="#/register">Register</a>
-                </li>
-                
-                <!-- This shows when logged in: Dropdown with username -->
-                <li class="nav-item dropdown role-logged-in">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        Username
-                    </a>
-                    <!-- Dropdown menu -->
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#/profile">Profile</a></li>
-                        <li><a class="dropdown-item" href="#/requests">My Requests</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#">Logout</a></li>
-                    </ul>
-                </li>
-                
-                <!-- Admin-only links -->
-                <li class="nav-item role-admin">
-                    <a class="nav-link" href="#/employees">Employees</a>
-                </li>
-                <li class="nav-item role-admin">
-                    <a class="nav-link" href="#/accounts">Accounts</a>
-                </li>
-                <li class="nav-item role-admin">
-                    <a class="nav-link" href="#/departments">Departments</a>
-                </li>
-                
-            </ul>
-            
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav ms-auto">
+
+                    <!-- Visible when NOT logged in -->
+                    <li class="nav-item role-logged-out">
+                        <a class="nav-link" href="#/login">Login</a>
+                    </li>
+                    <li class="nav-item role-logged-out">
+                        <a class="nav-link" href="#/register">Register</a>
+                    </li>
+
+                    <!-- Visible when logged in: user dropdown -->
+                    <li class="nav-item dropdown role-logged-in">
+                        <a class="nav-link dropdown-toggle" href="#" id="user-dropdown" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            Username
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#/profile">Profile</a></li>
+                            <li class="role-admin"><a class="dropdown-item" href="#/employees">Employees</a></li>
+                            <li class="role-admin"><a class="dropdown-item" href="#/accounts">Accounts</a></li>
+                            <li class="role-admin"><a class="dropdown-item" href="#/departments">Departments</a></li>
+                            <li><a class="dropdown-item" href="#/requests">My Requests</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="#" id="logout-btn">Logout</a></li>
+                        </ul>
+                    </li>
+
+                </ul>
+            </div>
         </div>
     </nav>
 
-    <!-- Main Content Area -->
+    <!-- ============================================
+         MAIN CONTENT
+         ============================================ -->
     <main class="container mt-4">
-        
-        <!-- Home Page -->
+
+        <!-- ===================== HOME ===================== -->
         <section id="home-page" class="page active">
             <h1>Welcome to Full-Stack App</h1>
             <p class="text-muted">A static prototype before backend integration. Simulates:</p>
-            
             <ul>
                 <li>Email registration + fake verification</li>
                 <li>Login with JWT-like token simulation</li>
                 <li>Role-based UI (Admin/User)</li>
                 <li>CRUD for Employees, Departments, Requests</li>
             </ul>
-            
             <div class="alert alert-info">
                 <strong>⚠️ Note:</strong> All data is stored in <code>localStorage</code>. Refresh to reset.
             </div>
-            
-            <button class="btn btn-primary">Get Started →</button>
+            <a href="#/register" class="btn btn-primary">Get Started →</a>
         </section>
-        
-        <!-- Register Page -->
+
+        <!-- ===================== REGISTER ===================== -->
         <section id="register-page" class="page">
             <div class="row justify-content-center">
                 <div class="col-md-6">
                     <h2>Register Account</h2>
-                    
-                    <form>
-                        <!-- First Name -->
+                    <form id="register-form">
                         <div class="mb-3">
-                            <label for="first-name" class="form-label">First Name</label>
-                            <input type="text" class="form-control" id="first-name" required>
+                            <label for="reg-firstname" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="reg-firstname" required>
                         </div>
-                        
-                        <!-- Last Name -->
                         <div class="mb-3">
-                            <label for="last-name" class="form-label">Last Name</label>
-                            <input type="text" class="form-control" id="last-name" required>
+                            <label for="reg-lastname" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="reg-lastname" required>
                         </div>
-                        
-                        <!-- Email -->
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" required>
+                            <label for="reg-email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="reg-email" required>
                         </div>
-                        
-                        <!-- Password -->
                         <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" required>
+                            <label for="reg-password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="reg-password" minlength="6" required>
                         </div>
-                        
-                        <!-- Buttons -->
                         <button type="submit" class="btn btn-success">Sign Up</button>
-                        <button type="button" class="btn btn-outline-secondary ms-2">Cancel</button>
+                        <button type="button" class="btn btn-outline-secondary ms-2" onclick="navigateTo('#/')">Cancel</button>
                     </form>
                 </div>
             </div>
         </section>
-        
-        <!-- Verify Email Page -->
+
+        <!-- ===================== VERIFY EMAIL ===================== -->
         <section id="verify-email-page" class="page">
             <div class="row justify-content-center">
                 <div class="col-md-6">
                     <h2>Verify Your Email</h2>
-                    
-                    <!-- Success message box -->
-                    <div class="alert alert-success d-flex align-items-center">
-                        <span class="me-2">✅</span>
-                        <span>A verification link has been sent to .</span>
-                    </div>
-                    
-                    <p>For demo purposes, click below to simulate verification:</p>
-                    
-                    <!-- Buttons -->
-                    <button type="button" class="btn btn-success">✓ Simulate Email Verification</button>
-                    <button type="button" class="btn btn-outline-secondary ms-2">Go to Login</button>
-                </div>
-            </div>
-        </section>
-        
-        <!-- Verify Email Page -->
-        <section id="verify-email-page" class="page">
-            <div class="row justify-content-center">
-                <div class="col-md-6">
-                    <h2>Verify Your Email</h2>
-                    
-                    <!-- Success message box -->
                     <div class="alert alert-success d-flex align-items-center">
                         <span class="me-2">✅</span>
                         <span>A verification link has been sent to <strong id="verify-email-display"></strong>.</span>
                     </div>
-                    
                     <p>For demo purposes, click below to simulate verification:</p>
-                    
-                    <!-- Buttons -->
-                    <button class="btn btn-success">✓ Simulate Email Verification</button>
-                    <button class="btn btn-outline-secondary ms-2">Go to Login</button>
+                    <button class="btn btn-success" id="verify-btn">✅ Simulate Email Verification</button>
+                    <button class="btn btn-outline-secondary ms-2" onclick="navigateTo('#/login')">Go to Login</button>
                 </div>
             </div>
         </section>
-        
-        <!-- Login Page -->
+
+        <!-- ===================== LOGIN ===================== -->
         <section id="login-page" class="page">
             <div class="row justify-content-center">
                 <div class="col-md-6">
                     <h2>Login</h2>
-                    
-                    <form>
-                        <!-- Email -->
+                    <form id="login-form">
                         <div class="mb-3">
                             <label for="login-email" class="form-label">Email</label>
                             <input type="email" class="form-control" id="login-email" required>
                         </div>
-                        
-                        <!-- Password -->
                         <div class="mb-3">
                             <label for="login-password" class="form-label">Password</label>
                             <input type="password" class="form-control" id="login-password" required>
                         </div>
-                        
-                        <!-- Buttons -->
                         <button type="submit" class="btn btn-primary">Login</button>
-                        <button type="button" class="btn btn-outline-secondary ms-2">Cancel</button>
+                        <button type="button" class="btn btn-outline-secondary ms-2" onclick="navigateTo('#/')">Cancel</button>
                     </form>
                 </div>
             </div>
         </section>
-        
-        <!-- Profile Page -->
+
+        <!-- ===================== PROFILE ===================== -->
         <section id="profile-page" class="page">
             <h2>My Profile</h2>
-            
-            <!-- This div will be filled by renderProfile() function -->
             <div id="profile-content">
                 <p class="text-muted">Loading profile...</p>
             </div>
         </section>
-        
-        <!-- Employees Page (Admin) -->
+
+        <!-- ===================== EMPLOYEES (Admin) ===================== -->
         <section id="employees-page" class="page">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2>Employees</h2>
                 <button class="btn btn-success" id="add-employee-btn">+ Add Employee</button>
             </div>
-            
-            <!-- This div will be filled by renderEmployeesList() function -->
-            <div id="employees-content">
-                <p class="text-muted">Loading employees...</p>
-            </div>
-            
-            <!-- Employees Table -->
-            <div class="card mb-3">
+
+            <!-- Table rendered by JS -->
+            <div id="employees-table-container"></div>
+
+            <!-- Add/Edit Employee Form (hidden by default) -->
+            <div class="card mt-3" id="employee-form-card" style="display:none;">
                 <div class="card-body">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Position</th>
-                                <th>Dept</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="employees-table-body">
-                            <tr>
-                                <td colspan="5" class="text-center text-muted">No employees.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <!-- Add/Edit Employee Form -->
-            <div class="card">
-                <div class="card-body">
-                    <h5>Add/Edit Employee</h5>
-                    
-                    <form>
-                        <!-- Employee ID -->
+                    <h5 id="employee-form-title">Add/Edit Employee</h5>
+                    <form id="employee-form">
+                        <input type="hidden" id="employee-edit-id">
                         <div class="mb-3">
-                            <label for="employee-id" class="form-label">Employee ID</label>
-                            <input type="text" class="form-control" id="employee-id" required>
+                            <label for="emp-id" class="form-label">Employee ID</label>
+                            <input type="text" class="form-control" id="emp-id" required>
                         </div>
-                        
-                        <!-- User Email -->
                         <div class="mb-3">
-                            <label for="employee-email" class="form-label">User Email</label>
-                            <input type="email" class="form-control" id="employee-email" required>
+                            <label for="emp-email" class="form-label">User Email</label>
+                            <input type="email" class="form-control" id="emp-email" required>
                         </div>
-                        
-                        <!-- Position -->
                         <div class="mb-3">
-                            <label for="employee-position" class="form-label">Position</label>
-                            <input type="text" class="form-control" id="employee-position" required>
+                            <label for="emp-position" class="form-label">Position</label>
+                            <input type="text" class="form-control" id="emp-position" required>
                         </div>
-                        
-                        <!-- Department -->
                         <div class="mb-3">
-                            <label for="employee-dept" class="form-label">Department</label>
-                            <select class="form-select" id="employee-dept" required>
+                            <label for="emp-dept" class="form-label">Department</label>
+                            <select class="form-select" id="emp-dept" required>
                                 <option value="">Select department...</option>
-                                <option value="engineering">Engineering</option>
-                                <option value="hr">HR</option>
                             </select>
                         </div>
-                        
-                        <!-- Hire Date -->
                         <div class="mb-3">
-                            <label for="employee-hire-date" class="form-label">Hire Date</label>
-                            <input type="date" class="form-control" id="employee-hire-date" required>
+                            <label for="emp-hiredate" class="form-label">Hire Date</label>
+                            <input type="date" class="form-control" id="emp-hiredate" required>
                         </div>
-                        
-                        <!-- Buttons -->
-                        <button type="submit" class="btn btn-primary">Save</button>
-                        <button type="button" class="btn btn-outline-secondary ms-2">Cancel</button>
+                        <button type="submit" class="btn btn-success">Save</button>
+                        <button type="button" class="btn btn-outline-secondary ms-2" onclick="hideEmployeeForm()">Cancel</button>
                     </form>
                 </div>
             </div>
         </section>
-        
-        <!-- Departments Page (Admin) -->
+
+        <!-- ===================== DEPARTMENTS (Admin) ===================== -->
         <section id="departments-page" class="page">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2>Departments</h2>
                 <button class="btn btn-success" id="add-department-btn">+ Add Department</button>
             </div>
-            
-            <!-- This div will be filled by renderDepartmentsList() function -->
-            <div id="departments-content">
-                <p class="text-muted">Loading departments...</p>
+
+            <!-- Table rendered by JS -->
+            <div id="departments-table-container"></div>
+
+            <!-- Add/Edit Department Form (hidden by default) -->
+            <div class="card mt-3" id="department-form-card" style="display:none;">
+                <div class="card-body">
+                    <h5 id="department-form-title">Add/Edit Department</h5>
+                    <form id="department-form">
+                        <input type="hidden" id="dept-edit-id">
+                        <div class="mb-3">
+                            <label for="dept-name" class="form-label">Department Name</label>
+                            <input type="text" class="form-control" id="dept-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="dept-desc" class="form-label">Description</label>
+                            <input type="text" class="form-control" id="dept-desc" required>
+                        </div>
+                        <button type="submit" class="btn btn-success">Save</button>
+                        <button type="button" class="btn btn-outline-secondary ms-2" onclick="hideDepartmentForm()">Cancel</button>
+                    </form>
+                </div>
             </div>
         </section>
-        
-        <!-- Accounts Page (Admin) -->
+
+        <!-- ===================== ACCOUNTS (Admin) ===================== -->
         <section id="accounts-page" class="page">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2>Accounts</h2>
                 <button class="btn btn-success" id="add-account-btn">+ Add Account</button>
             </div>
-            
-            <!-- This div will be filled by renderAccountsList() function -->
-            <div id="accounts-content">
-                <p class="text-muted">Loading accounts...</p>
-            </div>
-            
-            <!-- Accounts Table -->
-            <div class="card mb-3">
+
+            <!-- Table rendered by JS -->
+            <div id="accounts-table-container"></div>
+
+            <!-- Add/Edit Account Form (hidden by default) -->
+            <div class="card mt-3" id="account-form-card" style="display:none;">
                 <div class="card-body">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Verified</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="accounts-table-body">
-                            <!-- Example data -->
-                            <tr>
-                                <td>Admin User</td>
-                                <td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3352575e5a5d73564b525e435f561d505c5e">[email&#160;protected]</a></td>
-                                <td>Admin</td>
-                                <td>✅</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-primary">Edit</button>
-                                    <button class="btn btn-sm btn-outline-warning ms-1">Reset Password</button>
-                                    <button class="btn btn-sm btn-outline-danger ms-1">Delete</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <!-- Add/Edit Account Form -->
-            <div class="card">
-                <div class="card-body">
-                    <h5>Add/Edit Account</h5>
-                    
-                    <form>
-                        <!-- First Name -->
+                    <h5 id="account-form-title">Add/Edit Account</h5>
+                    <form id="account-form">
+                        <input type="hidden" id="acct-edit-id">
                         <div class="mb-3">
-                            <label for="account-firstname" class="form-label">First Name</label>
-                            <input type="text" class="form-control" id="account-firstname" required>
+                            <label for="acct-firstname" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="acct-firstname" required>
                         </div>
-                        
-                        <!-- Last Name -->
                         <div class="mb-3">
-                            <label for="account-lastname" class="form-label">Last Name</label>
-                            <input type="text" class="form-control" id="account-lastname" required>
+                            <label for="acct-lastname" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="acct-lastname" required>
                         </div>
-                        
-                        <!-- Email -->
                         <div class="mb-3">
-                            <label for="account-email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="account-email" required>
+                            <label for="acct-email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="acct-email" required>
                         </div>
-                        
-                        <!-- Password -->
                         <div class="mb-3">
-                            <label for="account-password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="account-password" required>
+                            <label for="acct-password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="acct-password" minlength="6">
                         </div>
-                        
-                        <!-- Role -->
                         <div class="mb-3">
-                            <label for="account-role" class="form-label">Role</label>
-                            <select class="form-select" id="account-role" required>
+                            <label for="acct-role" class="form-label">Role</label>
+                            <select class="form-select" id="acct-role">
                                 <option value="user">User</option>
                                 <option value="admin">Admin</option>
                             </select>
                         </div>
-                        
-                        <!-- Verified Checkbox -->
                         <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="account-verified">
-                            <label class="form-check-label" for="account-verified">
-                                Verified
-                            </label>
+                            <input type="checkbox" class="form-check-input" id="acct-verified">
+                            <label class="form-check-label" for="acct-verified">Verified</label>
                         </div>
-                        
-                        <!-- Buttons -->
-                        <button type="submit" class="btn btn-primary">Save</button>
-                        <button type="button" class="btn btn-outline-secondary ms-2">Cancel</button>
+                        <button type="submit" class="btn btn-success">Save</button>
+                        <button type="button" class="btn btn-outline-secondary ms-2" onclick="hideAccountForm()">Cancel</button>
                     </form>
                 </div>
             </div>
         </section>
-        
-        <!-- Requests Page -->
+
+        <!-- ===================== REQUESTS ===================== -->
         <section id="requests-page" class="page">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2>My Requests</h2>
                 <button class="btn btn-success" id="new-request-btn" data-bs-toggle="modal" data-bs-target="#newRequestModal">+ New Request</button>
             </div>
-            
-            <!-- Requests Table or Empty State -->
-            <div id="requests-content">
-                <p class="text-muted">You have no requests yet.</p>
-                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newRequestModal">Create One</button>
-            </div>
+            <div id="requests-content"></div>
         </section>
-        
+
     </main>
-    
-    <!-- New Request Modal -->
+
+    <!-- ============================================
+         NEW REQUEST MODAL
+         ============================================ -->
     <div class="modal fade" id="newRequestModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -420,7 +304,6 @@
                 </div>
                 <div class="modal-body">
                     <form id="new-request-form">
-                        <!-- Type Dropdown -->
                         <div class="mb-3">
                             <label for="request-type" class="form-label">Type</label>
                             <select class="form-select" id="request-type" required>
@@ -429,37 +312,33 @@
                                 <option value="Resources">Resources</option>
                             </select>
                         </div>
-                        
-                        <!-- Items Section -->
                         <div class="mb-3">
                             <label class="form-label">Items</label>
                             <div id="request-items-container">
-                                <!-- Item rows will be added here -->
                                 <div class="row mb-2 request-item">
                                     <div class="col-7">
-                                        <input type="text" class="form-control" placeholder="Item name" required>
+                                        <input type="text" class="form-control item-name" placeholder="Item name" required>
                                     </div>
                                     <div class="col-3">
-                                        <input type="number" class="form-control" value="1" min="1" required>
+                                        <input type="number" class="form-control item-qty" value="1" min="1" required>
                                     </div>
                                     <div class="col-2">
-                                        <button type="button" class="btn btn-danger btn-sm remove-item-btn">×</button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm remove-item-btn">×</button>
                                     </div>
                                 </div>
                             </div>
                             <button type="button" class="btn btn-sm btn-outline-success mt-2" id="add-item-btn">+ Add Item</button>
                         </div>
-                        
-                        <button type="submit" class="btn btn-primary">Submit Request</button>
+                        <button type="submit" class="btn btn-success">Submit Request</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- Custom JavaScript -->
     <script src="script.js"></script>
 </body>

@@ -1,56 +1,6 @@
-
 /* ============================================
-   RULE 1: When user is NOT logged in
+   PAGE VISIBILITY SYSTEM
    ============================================ */
-
-body.not-authenticated .role-logged-in {
-    display: none;
-}
-
-/* Hide admin links */
-body.not-authenticated .role-admin {
-    display: none;
-}
-
-
-/* ============================================
-   RULE 2: When user IS logged in
-   ============================================ */
-
-body.authenticated .role-logged-out {
-    display: none;
-}
-
-.role-admin {
-    display: none;
-}
-
-
-/* ============================================
-   RULE 3: When user is an ADMIN
-   ============================================ */
-
-body.is-admin .role-admin {
-    display: block;
-}
-
-
-/* ============================================
-   EXTRA STYLING
-   ============================================ */
-
-.navbar-brand {
-    font-weight: bold;
-}
-
-main {
-    margin-top: 20px;
-}
-
-/* ============================================
-   LESSON 1: PAGE VISIBILITY SYSTEM
-   ============================================
-*/
 
 .page {
     display: none;
@@ -60,11 +10,9 @@ main {
     display: block;
 }
 
-
 /* ============================================
-   LESSON 2: ROLE-BASED VISIBILITY
-   ============================================
-*/
+   ROLE-BASED VISIBILITY
+   ============================================ */
 
 body.not-authenticated .role-logged-in {
     display: none;
@@ -74,11 +22,9 @@ body.authenticated .role-logged-out {
     display: none;
 }
 
-
 /* ============================================
-   LESSON 3: ADMIN-ONLY VISIBILITY
-   ============================================
-*/
+   ADMIN-ONLY VISIBILITY
+   ============================================ */
 
 .role-admin {
     display: none;
@@ -88,14 +34,93 @@ body.is-admin .role-admin {
     display: block;
 }
 
+/* Dropdown list-items need list-item display, not block */
+body.is-admin .dropdown-menu .role-admin {
+    display: list-item;
+}
+
 /* ============================================
-   EXTRA STYLING (makes things look nicer)
+   NAVBAR STYLING
    ============================================ */
 
 .navbar-brand {
     font-weight: bold;
 }
 
+/* ============================================
+   LAYOUT
+   ============================================ */
+
 main {
     min-height: calc(100vh - 56px);
+    padding-bottom: 2rem;
+}
+
+/* ============================================
+   TOAST CONTAINER
+   ============================================ */
+
+.toast-container {
+    z-index: 1090;
+}
+
+/* ============================================
+   TABLES
+   ============================================ */
+
+.table th {
+    white-space: nowrap;
+}
+
+.table td .btn {
+    white-space: nowrap;
+}
+
+/* ============================================
+   BADGE HELPERS
+   ============================================ */
+
+.badge {
+    font-size: 0.85em;
+}
+
+/* ============================================
+   FORM CARDS
+   ============================================ */
+
+#employee-form-card,
+#account-form-card,
+#department-form-card {
+    max-width: 600px;
+}
+
+/* ============================================
+   REQUEST ITEMS
+   ============================================ */
+
+.request-item .remove-item-btn {
+    width: 100%;
+}
+
+/* ============================================
+   PROFILE CARD
+   ============================================ */
+
+#profile-content .card {
+    max-width: 450px;
+}
+
+/* ============================================
+   RESPONSIVE TWEAKS
+   ============================================ */
+
+@media (max-width: 768px) {
+    .table {
+        font-size: 0.85rem;
+    }
+
+    .table .btn-sm {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.4rem;
+    }
 }

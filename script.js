@@ -1,399 +1,16 @@
-/* ============================================
-   PHASE 2: CLIENT-SIDE ROUTING
-   ============================================
-*/
+/* ============================================================
+   FULL-STACK WEB APP — script.js
+   Complete SPA with Auth, CRUD, Routing & localStorage
+   ============================================================ */
 
-
-/* ============================================
-    GLOBAL VARIABLE
-   ============================================
-*/
+// ============================================
+// GLOBAL VARIABLES
+// ============================================
 
 let currentUser = null;
-
-
-/* ============================================
-    NAVIGATE FUNCTION
-   ============================================
-*/
-
-function navigateTo(hash) {
-    window.location.hash = hash;
-    // When the hash changes, handleRouting() will run automatically
-}
-
-
-/* ============================================
-    THE ROUTING FUNCTION
-   ============================================
-*/
-
-function handleRouting() {
-    let hash = window.location.hash || '#/';
-    
-    console.log('Current hash:', hash); // For debugging
-    
-    let pageName = hash.substring(2) || 'home';
-    
-    console.log('Page name:', pageName); // For debugging
-    
-    
-    /* ========================================
-        PROTECTED ROUTES
-       ========================================
-    */
-    
-    const protectedRoutes = ['profile', 'requests'];
-    
-    if (protectedRoutes.includes(pageName) && !currentUser) {
-        console.log('Access denied: Not logged in');
-        navigateTo('#/login');
-        return; // Stop here
-    }
-    
-    
-    /* ========================================
-        ADMIN-ONLY ROUTES
-       ========================================
-    */
-    
-    const adminRoutes = ['employees', 'accounts', 'departments'];
-    
-    if (adminRoutes.includes(pageName)) {
-        // Check if user is logged in
-        if (!currentUser) {
-            console.log('Access denied: Not logged in');
-            navigateTo('#/login');
-            return;
-        }
-        
-        // Check if user is admin
-        if (currentUser.role !== 'admin') {
-            console.log('Access denied: Not admin');
-            alert('Access denied. Admin privileges required.');
-            navigateTo('#/');
-            return;
-        }
-    }
-    
-    
-    /* ========================================
-        SHOW THE CORRECT PAGE
-       ========================================
-    */
-    
-    // Hide all pages first
-    document.querySelectorAll('.page').forEach(page => {
-        page.classList.remove('active');
-    });
-    
-    // Find the page we want to show
-    const targetPage = document.getElementById(`${pageName}-page`);
-    
-    if (targetPage) {
-        // Show the page
-        targetPage.classList.add('active');
-        console.log('Showing page:', pageName);
-        
-        // Call specific render functions for certain pages
-        if (pageName === 'profile') {
-            renderProfile();
-        }
-        if (pageName === 'accounts') {
-            renderAccountsList();
-        }
-        if (pageName === 'departments') {
-            renderDepartmentsList();
-        }
-        if (pageName === 'employees') {
-            renderEmployeesList();
-        }
-    } else {
-        // Page doesn't exist, go to home
-        console.log('Page not found:', pageName);
-        navigateTo('#/');
-    }
-}
-
-
-/* ============================================
-    LISTEN FOR HASH CHANGES
-   ============================================
-*/
-
-window.addEventListener('hashchange', handleRouting);
-
-
-/* ============================================
-    INITIALIZATION
-   ============================================
-*/
-
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('App initialized!');
-    
-    // If there's no hash in the URL, set it to home
-    if (!window.location.hash) {
-        window.location.hash = '#/';
-    }
-    
-    // Show the correct page
-    handleRouting();
-});
-
-
-/* ============================================
-    AUTHENTICATION SYSTEM
-   ============================================
-*/
-
-
-/* ============================================
-    REGISTRATION
-   ============================================
-*/
-
-document.addEventListener('DOMContentLoaded', () => {
-    const registerForm = document.querySelector('#register-page form');
-    
-    if (registerForm) {
-        registerForm.addEventListener('submit', (e) => {
-            e.preventDefault(); // Stop the form from refreshing the page
-            
-            console.log('Register form submitted!');
-            
-            // Get the values from the form
-            const firstName = document.getElementById('first-name').value.trim();
-            const lastName = document.getElementById('last-name').value.trim();
-            const email = document.getElementById('email').value.trim().toLowerCase();
-            const password = document.getElementById('password').value;
-            
-            console.log('Registration attempt:', email);
-            
-            // Check if email already exists
-            const existingAccount = window.db.accounts.find(acc => acc.email === email);
-            
-            if (existingAccount) {
-                alert('Email already registered!');
-                return; // Stop here
-            }
-            
-            // Create new account object
-            const newAccount = {
-                id: Date.now(), // Simple ID using timestamp
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                password: password,
-                role: 'user', // New users are regular users (not admin)
-                verified: false, // Not verified yet!
-                createdAt: new Date().toISOString()
-            };
-            
-            // Add to database
-            window.db.accounts.push(newAccount);
-            saveToStorage(); // Save to localStorage
-            
-            console.log('Account created:', newAccount);
-            
-            // Store email for verification
-            localStorage.setItem('unverified_email', email);
-            
-            // Navigate to verify email page
-            navigateTo('#/verify-email');
-            
-            // Show the email on the verify page
-            const emailDisplay = document.getElementById('verify-email-display');
-            if (emailDisplay) {
-                emailDisplay.textContent = email;
-            }
-            
-            alert('Registration successful! Please verify your email.');
-            registerForm.reset(); // Clear the form
-        });
-    }
-});
-
-
-/* ============================================
-    EMAIL VERIFICATION (SIMULATED)
-   ============================================
-*/
-
-document.addEventListener('DOMContentLoaded', () => {
-    const verifyBtn = document.querySelector('#verify-email-page button.btn-success');
-    
-    if (verifyBtn) {
-        verifyBtn.addEventListener('click', () => {
-            console.log('Verify button clicked!');
-            
-            // Get the email we're trying to verify
-            const unverifiedEmail = localStorage.getItem('unverified_email');
-            
-            if (!unverifiedEmail) {
-                alert('No pending verification found.');
-                return;
-            }
-            
-            console.log('Verifying email:', unverifiedEmail);
-            
-            // Find the account
-            const account = window.db.accounts.find(acc => acc.email === unverifiedEmail);
-            
-            if (account) {
-                // Mark as verified!
-                account.verified = true;
-                saveToStorage(); // Save to localStorage
-                
-                // Clear the unverified email
-                localStorage.removeItem('unverified_email');
-                
-                console.log('Email verified!', account);
-                alert('Email verified successfully! You can now login.');
-                
-                // Go to login page
-                navigateTo('#/login');
-            } else {
-                alert('Account not found.');
-            }
-        });
-    }
-});
-
-
-/* ============================================
-    LOGIN
-   ============================================
-*/
-
-document.addEventListener('DOMContentLoaded', () => {
-    const loginForm = document.querySelector('#login-page form');
-    
-    if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault(); // Stop form from refreshing page
-            
-            console.log('Login form submitted!');
-            
-            // Get values
-            const email = document.getElementById('login-email').value.trim().toLowerCase();
-            const password = document.getElementById('login-password').value;
-            
-            console.log('Login attempt:', email);
-            
-            // Find matching account
-            const account = window.db.accounts.find(acc => 
-                acc.email === email && 
-                acc.password === password && 
-                acc.verified === true
-            );
-            
-            if (account) {
-                console.log('Login successful!', account);
-                
-                // Save auth token
-                localStorage.setItem('auth_token', email);
-                
-                // Update auth state
-                setAuthState(true, account);
-                
-                // Go to profile
-                navigateTo('#/profile');
-                
-                alert(`Welcome back, ${account.firstName}!`);
-                loginForm.reset();
-            } else {
-                console.log('Login failed');
-                alert('Invalid email or password, or email not verified.');
-            }
-        });
-    }
-});
-
-
-/* ============================================
-    AUTH STATE MANAGEMENT
-   ============================================
-*/
-
-function setAuthState(isAuth, user = null) {
-    const body = document.body;
-    
-    console.log('Setting auth state:', isAuth, user);
-    
-    if (isAuth && user) {
-        // User is logged in!
-        currentUser = user;
-        
-        // Change body classes
-        body.classList.remove('not-authenticated');
-        body.classList.add('authenticated');
-        
-        // Update username display in navbar
-        const usernameDisplay = document.querySelector('.navbar-nav .dropdown-toggle');
-        if (usernameDisplay) {
-            usernameDisplay.textContent = `${user.firstName} ${user.lastName}`;
-        }
-        
-        // Check if admin
-        if (user.role === 'admin') {
-            body.classList.add('is-admin');
-            console.log('Admin user logged in');
-        } else {
-            body.classList.remove('is-admin');
-            console.log('Regular user logged in');
-        }
-    } else {
-        // User is logged out
-        currentUser = null;
-        
-        // Change body classes
-        body.classList.remove('authenticated', 'is-admin');
-        body.classList.add('not-authenticated');
-        
-        console.log('User logged out');
-    }
-}
-
-
-/* ============================================
-    LOGOUT
-   ============================================
-*/
-
-document.addEventListener('DOMContentLoaded', () => {
-    const logoutBtn = document.getElementById('logout-btn');
-    
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            
-            console.log('Logout clicked');
-            
-            // Clear auth token
-            localStorage.removeItem('auth_token');
-            
-            // Reset auth state
-            setAuthState(false);
-            
-            // Go to home
-            navigateTo('#/');
-            
-            alert('Logged out successfully.');
-        });
-    }
-});
-
-
-/* ============================================
-    DATA PERSISTENCE WITH LOCALSTORAGE
-   ============================================
-*/
-
-// Storage key constant
 const STORAGE_KEY = 'ipt_demo_v1';
 
-// Initialize the database
+// In-memory database (synced with localStorage)
 window.db = {
     accounts: [],
     departments: [],
@@ -401,41 +18,25 @@ window.db = {
     requests: []
 };
 
-
-/* ============================================
-   LOAD FROM STORAGE
-   ============================================
-*/
+// ============================================
+// PHASE 4: DATA PERSISTENCE WITH localStorage
+// ============================================
 
 function loadFromStorage() {
     try {
-        console.log('Loading data from localStorage...');
-        
-        // Try to get stored data
         const stored = localStorage.getItem(STORAGE_KEY);
-        
         if (stored) {
-            // Parse the JSON string back into an object
             window.db = JSON.parse(stored);
-            console.log('✅ Data loaded successfully:', window.db);
+            console.log('✅ Data loaded from localStorage');
         } else {
-            // No stored data, create initial seed data
-            console.log('⚠️ No stored data found. Creating seed data...');
+            console.log('⚠️ No stored data — seeding database');
             seedDatabase();
         }
     } catch (error) {
-        // If JSON is corrupt or other error, create seed data
-        console.error('❌ Error loading data:', error);
-        console.log('Creating fresh seed data...');
+        console.error('❌ Corrupt storage — reseeding', error);
         seedDatabase();
     }
 }
-
-
-/* ============================================
-   SEED DATABASE
-   ============================================
-*/
 
 function seedDatabase() {
     window.db = {
@@ -452,633 +53,836 @@ function seedDatabase() {
             }
         ],
         departments: [
-            {
-                id: 1,
-                name: 'Engineering',
-                description: 'Software development and technical operations'
-            },
-            {
-                id: 2,
-                name: 'HR',
-                description: 'Human resources and personnel management'
-            }
+            { id: 1, name: 'Engineering', description: 'Software team' },
+            { id: 2, name: 'HR', description: 'Human Resources' }
         ],
         employees: [],
         requests: []
     };
-    
-    console.log('✅ Seed data created:', window.db);
-    
-    // Save the seed data
     saveToStorage();
 }
 
-
-/* ============================================
-   SAVE TO STORAGE
-   ============================================
-*/
-
 function saveToStorage() {
     try {
-        // Convert JavaScript object to JSON string
-        const jsonString = JSON.stringify(window.db);
-        
-        // Save to localStorage
-        localStorage.setItem(STORAGE_KEY, jsonString);
-        
-        console.log('💾 Data saved to localStorage');
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(window.db));
+        console.log('💾 Data saved');
     } catch (error) {
-        console.error('❌ Error saving data:', error);
-        alert('Failed to save data!');
+        console.error('❌ Save failed', error);
     }
 }
 
-
-/* ============================================
-   INITIALIZE ON PAGE LOAD
-   ============================================
-*/
-
-// Load data immediately when script loads
+// Load data immediately
 loadFromStorage();
 
+// ============================================
+// PHASE 8: TOAST NOTIFICATIONS
+// ============================================
 
-/* ============================================
-    PROFILE PAGE
-   ============================================
-*/
+function showToast(message, type = 'info') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const bgMap = { success: 'bg-success', error: 'bg-danger', warning: 'bg-warning', info: 'bg-info' };
+    const bgClass = bgMap[type] || 'bg-info';
+    const textClass = type === 'warning' ? 'text-dark' : 'text-white';
+    const toastId = 'toast-' + Date.now();
+
+    container.insertAdjacentHTML('beforeend', `
+        <div id="${toastId}" class="toast align-items-center ${bgClass} ${textClass} border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    `);
+
+    const toastEl = document.getElementById(toastId);
+    const bsToast = new bootstrap.Toast(toastEl, { delay: 3500 });
+    bsToast.show();
+    toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+}
+
+// ============================================
+// PHASE 2: CLIENT-SIDE ROUTING
+// ============================================
+
+function navigateTo(hash) {
+    window.location.hash = hash;
+}
+
+function handleRouting() {
+    const hash = window.location.hash || '#/';
+    const pageName = hash.substring(2) || 'home';
+
+    // --- Protected routes (must be logged in) ---
+    const protectedRoutes = ['profile', 'requests'];
+    if (protectedRoutes.includes(pageName) && !currentUser) {
+        navigateTo('#/login');
+        return;
+    }
+
+    // --- Admin-only routes ---
+    const adminRoutes = ['employees', 'accounts', 'departments'];
+    if (adminRoutes.includes(pageName)) {
+        if (!currentUser) { navigateTo('#/login'); return; }
+        if (currentUser.role !== 'admin') {
+            showToast('Access denied. Admin privileges required.', 'error');
+            navigateTo('#/');
+            return;
+        }
+    }
+
+    // Hide all pages
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+
+    // Show the target page
+    const targetPage = document.getElementById(`${pageName}-page`);
+    if (targetPage) {
+        targetPage.classList.add('active');
+
+        // Page-specific rendering
+        if (pageName === 'profile')      renderProfile();
+        if (pageName === 'accounts')     renderAccountsList();
+        if (pageName === 'departments')  renderDepartmentsList();
+        if (pageName === 'employees')    renderEmployeesList();
+        if (pageName === 'requests')     renderRequests();
+        if (pageName === 'verify-email') {
+            const email = localStorage.getItem('unverified_email') || '';
+            const el = document.getElementById('verify-email-display');
+            if (el) el.textContent = email;
+        }
+    } else {
+        navigateTo('#/');
+    }
+}
+
+window.addEventListener('hashchange', handleRouting);
+
+// ============================================
+// PHASE 3-D: AUTH STATE MANAGEMENT
+// ============================================
+
+function setAuthState(isAuth, user = null) {
+    const body = document.body;
+
+    if (isAuth && user) {
+        currentUser = user;
+        body.classList.remove('not-authenticated');
+        body.classList.add('authenticated');
+
+        // Show user name in dropdown toggle
+        const dropdown = document.getElementById('user-dropdown');
+        if (dropdown) dropdown.textContent = user.firstName;
+
+        if (user.role === 'admin') {
+            body.classList.add('is-admin');
+        } else {
+            body.classList.remove('is-admin');
+        }
+    } else {
+        currentUser = null;
+        body.classList.remove('authenticated', 'is-admin');
+        body.classList.add('not-authenticated');
+    }
+}
+
+// ============================================
+// PHASE 5: PROFILE PAGE
+// ============================================
 
 function renderProfile() {
-    console.log('Rendering profile page...');
-    
-    // Make sure user is logged in
-    if (!currentUser) {
-        console.log('No user logged in!');
-        return;
-    }
-    
-    console.log('Current user:', currentUser);
-    
-    // Get the profile content container
-    const profileContent = document.getElementById('profile-content');
-    
-    if (!profileContent) {
-        console.error('Profile content container not found!');
-        return;
-    }
-    
-    // Create the HTML to display
-    profileContent.innerHTML = `
+    if (!currentUser) return;
+    const el = document.getElementById('profile-content');
+    if (!el) return;
+
+    el.innerHTML = `
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">${currentUser.firstName} ${currentUser.lastName}</h5>
                 <p class="card-text">
                     <strong>Email:</strong> ${currentUser.email}<br>
-                    <strong>Role:</strong> <span class="badge bg-${currentUser.role === 'admin' ? 'danger' : 'primary'}">${currentUser.role}</span><br>
-                    <strong>Account Status:</strong> <span class="badge bg-success">Verified ✓</span>
+                    <strong>Role:</strong> ${currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1)}
                 </p>
-                <button class="btn btn-primary" onclick="editProfile()">Edit Profile</button>
+                <button class="btn btn-outline-dark btn-sm" onclick="editProfile()">Edit Profile</button>
             </div>
         </div>
     `;
-    
-    console.log('✅ Profile rendered');
 }
-
-
-/* ============================================
-   EDIT PROFILE FUNCTION
-   ============================================
-*/
 
 function editProfile() {
-    alert('Edit profile feature coming soon!');
+    showToast('Edit profile feature coming soon!', 'info');
 }
 
-
-/* ============================================
-    ADMIN CRUD FEATURES
-   ============================================
-*/
-
-
-/* ============================================
-    ACCOUNTS MANAGEMENT
-   ============================================ */
+// ============================================
+// PHASE 6-A: ACCOUNTS MANAGEMENT (Admin CRUD)
+// ============================================
 
 function renderAccountsList() {
-    console.log('Rendering accounts list...');
-    
-    const accountsContent = document.getElementById('accounts-content');
-    if (!accountsContent) return;
-    
-    // Build the table HTML
-    let tableHTML = `
-        <table class="table table-striped">
-            <thead>
+    const container = document.getElementById('accounts-table-container');
+    if (!container) return;
+
+    let html = `
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr><th>Name</th><th>Email</th><th>Role</th><th>Verified</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>`;
+
+    if (window.db.accounts.length === 0) {
+        html += `<tr><td colspan="5" class="text-center text-muted">No accounts.</td></tr>`;
+    } else {
+        window.db.accounts.forEach(a => {
+            html += `
                 <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Verified</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
-    
-    // Add a row for each account
-    window.db.accounts.forEach(account => {
-        tableHTML += `
-            <tr>
-                <td>${account.firstName} ${account.lastName}</td>
-                <td>${account.email}</td>
-                <td><span class="badge bg-${account.role === 'admin' ? 'danger' : 'primary'}">${account.role}</span></td>
-                <td>${account.verified ? '✅' : '❌'}</td>
-                <td>
-                    <button class="btn btn-sm btn-outline-primary" onclick="editAccount(${account.id})">Edit</button>
-                    <button class="btn btn-sm btn-outline-warning ms-1" onclick="resetPassword(${account.id})">Reset Password</button>
-                    <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteAccount(${account.id})">Delete</button>
-                </td>
-            </tr>
-        `;
-    });
-    
-    tableHTML += `
-            </tbody>
-        </table>
-    `;
-    
-    accountsContent.innerHTML = tableHTML;
-    console.log('✅ Accounts table rendered');
+                    <td>${a.firstName} ${a.lastName}</td>
+                    <td>${a.email}</td>
+                    <td><span class="badge bg-${a.role === 'admin' ? 'danger' : 'primary'}">${a.role}</span></td>
+                    <td>${a.verified ? '✅' : '❌'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editAccount(${a.id})">Edit</button>
+                        <button class="btn btn-sm btn-outline-warning ms-1" onclick="resetPassword(${a.id})">Reset Password</button>
+                        <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteAccount(${a.id})">Delete</button>
+                    </td>
+                </tr>`;
+        });
+    }
+
+    html += `</tbody></table></div></div>`;
+    container.innerHTML = html;
 }
 
+function showAccountForm(accountId = null) {
+    const card = document.getElementById('account-form-card');
+    const title = document.getElementById('account-form-title');
+    card.style.display = 'block';
 
-/* ============================================
-   EDIT ACCOUNT FUNCTION
-   ============================================ */
+    document.getElementById('acct-edit-id').value = '';
+    document.getElementById('acct-firstname').value = '';
+    document.getElementById('acct-lastname').value = '';
+    document.getElementById('acct-email').value = '';
+    document.getElementById('acct-password').value = '';
+    document.getElementById('acct-role').value = 'user';
+    document.getElementById('acct-verified').checked = false;
+    document.getElementById('acct-password').required = true;
 
-function editAccount(accountId) {
-    console.log('Editing account:', accountId);
-    
-    // Find the account
-    const account = window.db.accounts.find(acc => acc.id === accountId);
-    if (!account) {
-        alert('Account not found!');
-        return;
+    if (accountId) {
+        const acct = window.db.accounts.find(a => a.id === accountId);
+        if (!acct) return;
+        title.textContent = 'Edit Account';
+        document.getElementById('acct-edit-id').value = acct.id;
+        document.getElementById('acct-firstname').value = acct.firstName;
+        document.getElementById('acct-lastname').value = acct.lastName;
+        document.getElementById('acct-email').value = acct.email;
+        document.getElementById('acct-role').value = acct.role;
+        document.getElementById('acct-verified').checked = acct.verified;
+        document.getElementById('acct-password').required = false; // optional on edit
+    } else {
+        title.textContent = 'Add Account';
     }
-    
-    // For now, use simple prompts (you can make this a modal later!)
-    const firstName = prompt('First Name:', account.firstName);
-    if (!firstName) return; // User cancelled
-    
-    const lastName = prompt('Last Name:', account.lastName);
-    if (!lastName) return;
-    
-    const email = prompt('Email:', account.email);
-    if (!email) return;
-    
-    const role = prompt('Role (user/admin):', account.role);
-    if (!role || (role !== 'user' && role !== 'admin')) {
-        alert('Invalid role! Must be "user" or "admin"');
-        return;
+
+    card.scrollIntoView({ behavior: 'smooth' });
+}
+
+function hideAccountForm() {
+    document.getElementById('account-form-card').style.display = 'none';
+    document.getElementById('account-form').reset();
+}
+
+function handleAccountSubmit(e) {
+    e.preventDefault();
+    const editId = document.getElementById('acct-edit-id').value;
+    const firstName = document.getElementById('acct-firstname').value.trim();
+    const lastName = document.getElementById('acct-lastname').value.trim();
+    const email = document.getElementById('acct-email').value.trim().toLowerCase();
+    const password = document.getElementById('acct-password').value;
+    const role = document.getElementById('acct-role').value;
+    const verified = document.getElementById('acct-verified').checked;
+
+    if (editId) {
+        // Update existing
+        const acct = window.db.accounts.find(a => a.id === parseInt(editId));
+        if (!acct) return;
+        acct.firstName = firstName;
+        acct.lastName = lastName;
+        acct.email = email;
+        if (password) acct.password = password;
+        acct.role = role;
+        acct.verified = verified;
+        showToast('Account updated!', 'success');
+    } else {
+        // Create new
+        if (!password || password.length < 6) {
+            showToast('Password must be at least 6 characters.', 'error');
+            return;
+        }
+        if (window.db.accounts.find(a => a.email === email)) {
+            showToast('Email already exists!', 'error');
+            return;
+        }
+        window.db.accounts.push({
+            id: Date.now(),
+            firstName, lastName, email, password, role, verified,
+            createdAt: new Date().toISOString()
+        });
+        showToast('Account created!', 'success');
     }
-    
-    const verified = confirm('Is this account verified?');
-    
-    // Update the account
-    account.firstName = firstName;
-    account.lastName = lastName;
-    account.email = email.toLowerCase();
-    account.role = role;
-    account.verified = verified;
-    
-    // Save to storage
+
     saveToStorage();
-    
-    // Re-render the table
+    hideAccountForm();
     renderAccountsList();
-    
-    alert('Account updated successfully!');
 }
 
+function editAccount(id) { showAccountForm(id); }
 
-/* ============================================
-   RESET PASSWORD FUNCTION
-   ============================================ */
-
-function resetPassword(accountId) {
-    console.log('Resetting password for account:', accountId);
-    
-    // Find the account
-    const account = window.db.accounts.find(acc => acc.id === accountId);
-    if (!account) {
-        alert('Account not found!');
-        return;
-    }
-    
-    // Prompt for new password
-    const newPassword = prompt(`Reset password for ${account.email}\n\nEnter new password (min 6 characters):`);
-    
-    if (!newPassword) return; // User cancelled
-    
-    // Validate password length
-    if (newPassword.length < 6) {
-        alert('Password must be at least 6 characters!');
-        return;
-    }
-    
-    // Update password
-    account.password = newPassword;
-    
-    // Save to storage
+function resetPassword(id) {
+    const acct = window.db.accounts.find(a => a.id === id);
+    if (!acct) return;
+    const pw = prompt(`Reset password for ${acct.email}\n\nEnter new password (min 6 chars):`);
+    if (!pw) return;
+    if (pw.length < 6) { showToast('Password must be at least 6 characters.', 'error'); return; }
+    acct.password = pw;
     saveToStorage();
-    
-    alert('Password reset successfully!');
+    showToast('Password reset successfully!', 'success');
 }
 
-
-/* ============================================
-   DELETE ACCOUNT FUNCTION
-   ============================================ */
-
-function deleteAccount(accountId) {
-    console.log('Deleting account:', accountId);
-    
-    // Prevent self-deletion
-    if (currentUser && currentUser.id === accountId) {
-        alert('You cannot delete your own account!');
+function deleteAccount(id) {
+    if (currentUser && currentUser.id === id) {
+        showToast('You cannot delete your own account!', 'error');
         return;
     }
-    
-    // Find the account
-    const account = window.db.accounts.find(acc => acc.id === accountId);
-    if (!account) {
-        alert('Account not found!');
-        return;
-    }
-    
-    // Confirm deletion
-    const confirmed = confirm(`Are you sure you want to delete the account for ${account.email}?\n\nThis action cannot be undone!`);
-    
-    if (!confirmed) return;
-    
-    // Remove from array
-    window.db.accounts = window.db.accounts.filter(acc => acc.id !== accountId);
-    
-    // Save to storage
+    const acct = window.db.accounts.find(a => a.id === id);
+    if (!acct) return;
+    if (!confirm(`Delete account for ${acct.email}?`)) return;
+    window.db.accounts = window.db.accounts.filter(a => a.id !== id);
     saveToStorage();
-    
-    // Re-render the table
     renderAccountsList();
-    
-    alert('Account deleted successfully!');
+    showToast('Account deleted.', 'success');
 }
 
-
-/* ============================================
-    DEPARTMENTS MANAGEMENT
-   ============================================ */
+// ============================================
+// PHASE 6-B: DEPARTMENTS MANAGEMENT
+// ============================================
 
 function renderDepartmentsList() {
-    console.log('Rendering departments list...');
-    
-    const deptsContent = document.getElementById('departments-content');
-    if (!deptsContent) return;
-    
-    // Build the table HTML
-    let tableHTML = `
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
-    
-    // Check if there are departments
+    const container = document.getElementById('departments-table-container');
+    if (!container) return;
+
+    let html = `
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr><th>Name</th><th>Description</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>`;
+
     if (window.db.departments.length === 0) {
-        tableHTML += `
-            <tr>
-                <td colspan="3" class="text-center text-muted">No departments found.</td>
-            </tr>
-        `;
+        html += `<tr><td colspan="3" class="text-center text-muted">No departments.</td></tr>`;
     } else {
-        // Add a row for each department
-        window.db.departments.forEach(dept => {
-            tableHTML += `
+        window.db.departments.forEach(d => {
+            html += `
                 <tr>
-                    <td>${dept.name}</td>
-                    <td>${dept.description}</td>
+                    <td>${d.name}</td>
+                    <td>${d.description}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline-primary" onclick="editDepartment(${dept.id})">Edit</button>
-                        <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteDepartment(${dept.id})">Delete</button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editDepartment(${d.id})">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteDepartment(${d.id})">Delete</button>
                     </td>
-                </tr>
-            `;
+                </tr>`;
         });
     }
-    
-    tableHTML += `
-            </tbody>
-        </table>
-    `;
-    
-    deptsContent.innerHTML = tableHTML;
-    console.log('✅ Departments table rendered');
+
+    html += `</tbody></table></div></div>`;
+    container.innerHTML = html;
 }
 
+function showDepartmentForm(deptId = null) {
+    const card = document.getElementById('department-form-card');
+    const title = document.getElementById('department-form-title');
+    card.style.display = 'block';
 
-/* ============================================
-   ADD DEPARTMENT BUTTON
-   ============================================ */
+    document.getElementById('dept-edit-id').value = '';
+    document.getElementById('dept-name').value = '';
+    document.getElementById('dept-desc').value = '';
 
-document.addEventListener('DOMContentLoaded', () => {
-    const addDeptBtn = document.getElementById('add-department-btn');
-    
-    if (addDeptBtn) {
-        addDeptBtn.addEventListener('click', () => {
-            alert('Add department feature not implemented yet!');
+    if (deptId) {
+        const dept = window.db.departments.find(d => d.id === deptId);
+        if (!dept) return;
+        title.textContent = 'Edit Department';
+        document.getElementById('dept-edit-id').value = dept.id;
+        document.getElementById('dept-name').value = dept.name;
+        document.getElementById('dept-desc').value = dept.description;
+    } else {
+        title.textContent = 'Add Department';
+    }
+
+    card.scrollIntoView({ behavior: 'smooth' });
+}
+
+function hideDepartmentForm() {
+    document.getElementById('department-form-card').style.display = 'none';
+    document.getElementById('department-form').reset();
+}
+
+function handleDepartmentSubmit(e) {
+    e.preventDefault();
+    const editId = document.getElementById('dept-edit-id').value;
+    const name = document.getElementById('dept-name').value.trim();
+    const description = document.getElementById('dept-desc').value.trim();
+
+    if (editId) {
+        const dept = window.db.departments.find(d => d.id === parseInt(editId));
+        if (!dept) return;
+        dept.name = name;
+        dept.description = description;
+        showToast('Department updated!', 'success');
+    } else {
+        window.db.departments.push({
+            id: Date.now(),
+            name,
+            description
         });
+        showToast('Department created!', 'success');
     }
-});
 
-
-/* ============================================
-   EDIT DEPARTMENT FUNCTION
-   ============================================ */
-
-function editDepartment(deptId) {
-    console.log('Editing department:', deptId);
-    
-    const dept = window.db.departments.find(d => d.id === deptId);
-    if (!dept) {
-        alert('Department not found!');
-        return;
-    }
-    
-    const name = prompt('Department Name:', dept.name);
-    if (!name) return;
-    
-    const description = prompt('Description:', dept.description);
-    if (!description) return;
-    
-    dept.name = name;
-    dept.description = description;
-    
     saveToStorage();
+    hideDepartmentForm();
     renderDepartmentsList();
-    
-    alert('Department updated successfully!');
 }
 
+function editDepartment(id) { showDepartmentForm(id); }
 
-/* ============================================
-   DELETE DEPARTMENT FUNCTION
-   ============================================ */
-
-function deleteDepartment(deptId) {
-    console.log('Deleting department:', deptId);
-    
-    const dept = window.db.departments.find(d => d.id === deptId);
-    if (!dept) {
-        alert('Department not found!');
-        return;
-    }
-    
-    const confirmed = confirm(`Delete department "${dept.name}"?\n\nThis action cannot be undone!`);
-    if (!confirmed) return;
-    
-    window.db.departments = window.db.departments.filter(d => d.id !== deptId);
-    
+function deleteDepartment(id) {
+    const dept = window.db.departments.find(d => d.id === id);
+    if (!dept) return;
+    if (!confirm(`Delete department "${dept.name}"?`)) return;
+    window.db.departments = window.db.departments.filter(d => d.id !== id);
     saveToStorage();
     renderDepartmentsList();
-    
-    alert('Department deleted successfully!');
+    showToast('Department deleted.', 'success');
 }
 
-
-/* ============================================
-    EMPLOYEES MANAGEMENT
-   ============================================ */
+// ============================================
+// PHASE 6-C: EMPLOYEES MANAGEMENT
+// ============================================
 
 function renderEmployeesList() {
-    console.log('Rendering employees list...');
-    
-    const employeesContent = document.getElementById('employees-content');
-    if (!employeesContent) return;
-    
-    // Build the table HTML
-    let tableHTML = `
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>User</th>
-                    <th>Position</th>
-                    <th>Dept</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
-    
-    // Check if there are employees
+    const container = document.getElementById('employees-table-container');
+    if (!container) return;
+
+    let html = `
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr><th>ID</th><th>Name</th><th>Position</th><th>Dept</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>`;
+
     if (window.db.employees.length === 0) {
-        tableHTML += `
-            <tr>
-                <td colspan="5" class="text-center text-muted">No employees found.</td>
-            </tr>
-        `;
+        html += `<tr><td colspan="5" class="text-center text-muted">No employees.</td></tr>`;
     } else {
-        // Add a row for each employee
-        window.db.employees.forEach(employee => {
-            // Find the user account
-            const user = window.db.accounts.find(acc => acc.id === employee.userId);
-            const userEmail = user ? user.email : 'Unknown';
-            
-            // Find the department
-            const dept = window.db.departments.find(d => d.id === employee.departmentId);
+        window.db.employees.forEach(emp => {
+            const user = window.db.accounts.find(a => a.id === emp.userId);
+            const userName = user ? user.email : 'Unknown';
+            const dept = window.db.departments.find(d => d.id === emp.departmentId);
             const deptName = dept ? dept.name : 'Unknown';
-            
-            tableHTML += `
+
+            html += `
                 <tr>
-                    <td>${employee.employeeId}</td>
-                    <td>${userEmail}</td>
-                    <td>${employee.position}</td>
+                    <td>${emp.employeeId}</td>
+                    <td>${userName}</td>
+                    <td>${emp.position}</td>
                     <td>${deptName}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline-primary" onclick="editEmployee(${employee.id})">Edit</button>
-                        <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteEmployee(${employee.id})">Delete</button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editEmployee(${emp.id})">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteEmployee(${emp.id})">Delete</button>
                     </td>
-                </tr>
-            `;
+                </tr>`;
         });
     }
-    
-    tableHTML += `
-            </tbody>
-        </table>
-    `;
-    
-    employeesContent.innerHTML = tableHTML;
-    console.log('✅ Employees table rendered');
+
+    html += `</tbody></table></div></div>`;
+    container.innerHTML = html;
 }
 
+function populateDeptDropdown() {
+    const sel = document.getElementById('emp-dept');
+    sel.innerHTML = '<option value="">Select department...</option>';
+    window.db.departments.forEach(d => {
+        sel.innerHTML += `<option value="${d.id}">${d.name}</option>`;
+    });
+}
 
-/* ============================================
-   ADD EMPLOYEE BUTTON
-   ============================================ */
+function showEmployeeForm(empId = null) {
+    const card = document.getElementById('employee-form-card');
+    const title = document.getElementById('employee-form-title');
+    card.style.display = 'block';
+    populateDeptDropdown();
 
-document.addEventListener('DOMContentLoaded', () => {
-    const addEmployeeBtn = document.getElementById('add-employee-btn');
-    
-    if (addEmployeeBtn) {
-        addEmployeeBtn.addEventListener('click', () => {
-            console.log('Add employee clicked');
-            
-            // Employee ID
-            const employeeId = prompt('Employee ID:');
-            if (!employeeId) return;
-            
-            // User Email
-            const userEmail = prompt('User Email (must match existing account):');
-            if (!userEmail) return;
-            
-            // Find the user account
-            const user = window.db.accounts.find(acc => acc.email === userEmail.toLowerCase());
-            if (!user) {
-                alert('No account found with that email! Please create the account first.');
-                return;
-            }
-            
-            // Position
-            const position = prompt('Position:');
-            if (!position) return;
-            
-            // Show available departments
-            const deptList = window.db.departments.map(d => `${d.id}: ${d.name}`).join('\n');
-            const deptId = prompt(`Department ID:\n\n${deptList}\n\nEnter department ID:`);
-            if (!deptId) return;
-            
-            // Validate department exists
-            const dept = window.db.departments.find(d => d.id === parseInt(deptId));
-            if (!dept) {
-                alert('Invalid department ID!');
-                return;
-            }
-            
-            // Hire Date
-            const hireDate = prompt('Hire Date (YYYY-MM-DD):');
-            if (!hireDate) return;
-            
-            // Create new employee
-            const newEmployee = {
-                id: Date.now(),
-                employeeId: employeeId,
-                userId: user.id,
-                position: position,
-                departmentId: parseInt(deptId),
-                hireDate: hireDate
-            };
-            
-            window.db.employees.push(newEmployee);
-            saveToStorage();
-            renderEmployeesList();
-            
-            alert('Employee added successfully!');
-        });
+    document.getElementById('employee-edit-id').value = '';
+    document.getElementById('emp-id').value = '';
+    document.getElementById('emp-email').value = '';
+    document.getElementById('emp-position').value = '';
+    document.getElementById('emp-dept').value = '';
+    document.getElementById('emp-hiredate').value = '';
+
+    if (empId) {
+        const emp = window.db.employees.find(e => e.id === empId);
+        if (!emp) return;
+        title.textContent = 'Edit Employee';
+        document.getElementById('employee-edit-id').value = emp.id;
+        document.getElementById('emp-id').value = emp.employeeId;
+        const user = window.db.accounts.find(a => a.id === emp.userId);
+        document.getElementById('emp-email').value = user ? user.email : '';
+        document.getElementById('emp-position').value = emp.position;
+        document.getElementById('emp-dept').value = emp.departmentId;
+        document.getElementById('emp-hiredate').value = emp.hireDate;
+    } else {
+        title.textContent = 'Add Employee';
     }
-});
 
+    card.scrollIntoView({ behavior: 'smooth' });
+}
 
-/* ============================================
-   EDIT EMPLOYEE FUNCTION
-   ============================================ */
+function hideEmployeeForm() {
+    document.getElementById('employee-form-card').style.display = 'none';
+    document.getElementById('employee-form').reset();
+}
 
-function editEmployee(id) {
-    console.log('Editing employee:', id);
-    
-    const employee = window.db.employees.find(e => e.id === id);
-    if (!employee) {
-        alert('Employee not found!');
+function handleEmployeeSubmit(e) {
+    e.preventDefault();
+    const editId = document.getElementById('employee-edit-id').value;
+    const employeeId = document.getElementById('emp-id').value.trim();
+    const email = document.getElementById('emp-email').value.trim().toLowerCase();
+    const position = document.getElementById('emp-position').value.trim();
+    const departmentId = parseInt(document.getElementById('emp-dept').value);
+    const hireDate = document.getElementById('emp-hiredate').value;
+
+    // Validate user exists
+    const user = window.db.accounts.find(a => a.email === email);
+    if (!user) {
+        showToast('No account found with that email!', 'error');
         return;
     }
-    
-    // Employee ID
-    const employeeId = prompt('Employee ID:', employee.employeeId);
-    if (!employeeId) return;
-    
-    // Position
-    const position = prompt('Position:', employee.position);
-    if (!position) return;
-    
-    // Department
-    const deptList = window.db.departments.map(d => `${d.id}: ${d.name}`).join('\n');
-    const deptId = prompt(`Department ID:\n\n${deptList}\n\nEnter department ID:`, employee.departmentId);
-    if (!deptId) return;
-    
-    // Hire Date
-    const hireDate = prompt('Hire Date (YYYY-MM-DD):', employee.hireDate);
-    if (!hireDate) return;
-    
-    // Update employee
-    employee.employeeId = employeeId;
-    employee.position = position;
-    employee.departmentId = parseInt(deptId);
-    employee.hireDate = hireDate;
-    
+
+    // Validate department exists
+    const dept = window.db.departments.find(d => d.id === departmentId);
+    if (!dept) {
+        showToast('Invalid department!', 'error');
+        return;
+    }
+
+    if (editId) {
+        const emp = window.db.employees.find(e => e.id === parseInt(editId));
+        if (!emp) return;
+        emp.employeeId = employeeId;
+        emp.userId = user.id;
+        emp.position = position;
+        emp.departmentId = departmentId;
+        emp.hireDate = hireDate;
+        showToast('Employee updated!', 'success');
+    } else {
+        window.db.employees.push({
+            id: Date.now(),
+            employeeId,
+            userId: user.id,
+            position,
+            departmentId,
+            hireDate
+        });
+        showToast('Employee added!', 'success');
+    }
+
     saveToStorage();
+    hideEmployeeForm();
     renderEmployeesList();
-    
-    alert('Employee updated successfully!');
 }
 
-
-/* ============================================
-   DELETE EMPLOYEE FUNCTION
-   ============================================ */
+function editEmployee(id) { showEmployeeForm(id); }
 
 function deleteEmployee(id) {
-    console.log('Deleting employee:', id);
-    
-    const employee = window.db.employees.find(e => e.id === id);
-    if (!employee) {
-        alert('Employee not found!');
-        return;
-    }
-    
-    const confirmed = confirm(`Delete employee ${employee.employeeId}?\n\nThis action cannot be undone!`);
-    if (!confirmed) return;
-    
+    const emp = window.db.employees.find(e => e.id === id);
+    if (!emp) return;
+    if (!confirm(`Delete employee ${emp.employeeId}?`)) return;
     window.db.employees = window.db.employees.filter(e => e.id !== id);
-    
     saveToStorage();
     renderEmployeesList();
-    
-    alert('Employee deleted successfully!');
+    showToast('Employee deleted.', 'success');
 }
 
-// Check for existing auth on page load
+// ============================================
+// PHASE 7: USER REQUESTS
+// ============================================
+
+function renderRequests() {
+    const container = document.getElementById('requests-content');
+    if (!container || !currentUser) return;
+
+    const myRequests = window.db.requests.filter(r => r.employeeEmail === currentUser.email);
+
+    if (myRequests.length === 0) {
+        container.innerHTML = `
+            <p class="text-muted">You have no requests yet.</p>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newRequestModal">Create One</button>
+        `;
+        return;
+    }
+
+    let html = `
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr><th>#</th><th>Type</th><th>Items</th><th>Date</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>`;
+
+    myRequests.forEach((req, i) => {
+        const badgeMap = { Pending: 'warning', Approved: 'success', Rejected: 'danger' };
+        const badge = badgeMap[req.status] || 'secondary';
+        const itemsList = req.items.map(it => `${it.name} (×${it.qty})`).join(', ');
+
+        html += `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${req.type}</td>
+                <td>${itemsList}</td>
+                <td>${req.date}</td>
+                <td><span class="badge bg-${badge}">${req.status}</span></td>
+            </tr>`;
+    });
+
+    html += `</tbody></table></div></div>`;
+    container.innerHTML = html;
+}
+
+function addRequestItem() {
+    const container = document.getElementById('request-items-container');
+    container.insertAdjacentHTML('beforeend', `
+        <div class="row mb-2 request-item">
+            <div class="col-7">
+                <input type="text" class="form-control item-name" placeholder="Item name" required>
+            </div>
+            <div class="col-3">
+                <input type="number" class="form-control item-qty" value="1" min="1" required>
+            </div>
+            <div class="col-2">
+                <button type="button" class="btn btn-outline-danger btn-sm remove-item-btn">×</button>
+            </div>
+        </div>
+    `);
+}
+
+function handleRequestSubmit(e) {
+    e.preventDefault();
+
+    const type = document.getElementById('request-type').value;
+    const itemRows = document.querySelectorAll('#request-items-container .request-item');
+    const items = [];
+
+    itemRows.forEach(row => {
+        const name = row.querySelector('.item-name').value.trim();
+        const qty = parseInt(row.querySelector('.item-qty').value) || 1;
+        if (name) items.push({ name, qty });
+    });
+
+    if (items.length === 0) {
+        showToast('Please add at least one item.', 'error');
+        return;
+    }
+
+    window.db.requests.push({
+        id: Date.now(),
+        type,
+        items,
+        status: 'Pending',
+        date: new Date().toISOString().split('T')[0],
+        employeeEmail: currentUser.email
+    });
+
+    saveToStorage();
+
+    // Close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('newRequestModal'));
+    if (modal) modal.hide();
+
+    // Reset form
+    document.getElementById('new-request-form').reset();
+    const container = document.getElementById('request-items-container');
+    container.innerHTML = `
+        <div class="row mb-2 request-item">
+            <div class="col-7">
+                <input type="text" class="form-control item-name" placeholder="Item name" required>
+            </div>
+            <div class="col-3">
+                <input type="number" class="form-control item-qty" value="1" min="1" required>
+            </div>
+            <div class="col-2">
+                <button type="button" class="btn btn-outline-danger btn-sm remove-item-btn">×</button>
+            </div>
+        </div>
+    `;
+
+    renderRequests();
+    showToast('Request submitted!', 'success');
+}
+
+// ============================================
+// PHASE 3-A: REGISTRATION
+// ============================================
+
+function handleRegister(e) {
+    e.preventDefault();
+
+    const firstName = document.getElementById('reg-firstname').value.trim();
+    const lastName  = document.getElementById('reg-lastname').value.trim();
+    const email     = document.getElementById('reg-email').value.trim().toLowerCase();
+    const password  = document.getElementById('reg-password').value;
+
+    if (password.length < 6) {
+        showToast('Password must be at least 6 characters.', 'error');
+        return;
+    }
+
+    if (window.db.accounts.find(a => a.email === email)) {
+        showToast('Email already registered!', 'error');
+        return;
+    }
+
+    window.db.accounts.push({
+        id: Date.now(),
+        firstName, lastName, email, password,
+        role: 'user',
+        verified: false,
+        createdAt: new Date().toISOString()
+    });
+    saveToStorage();
+
+    localStorage.setItem('unverified_email', email);
+    document.getElementById('register-form').reset();
+    showToast('Registration successful! Please verify your email.', 'success');
+    navigateTo('#/verify-email');
+}
+
+// ============================================
+// PHASE 3-B: EMAIL VERIFICATION (Simulated)
+// ============================================
+
+function handleVerify() {
+    const email = localStorage.getItem('unverified_email');
+    if (!email) {
+        showToast('No pending verification found.', 'warning');
+        return;
+    }
+
+    const account = window.db.accounts.find(a => a.email === email);
+    if (!account) {
+        showToast('Account not found.', 'error');
+        return;
+    }
+
+    account.verified = true;
+    saveToStorage();
+    localStorage.removeItem('unverified_email');
+
+    showToast('Email verified! You may now log in.', 'success');
+    navigateTo('#/login');
+}
+
+// ============================================
+// PHASE 3-C: LOGIN
+// ============================================
+
+function handleLogin(e) {
+    e.preventDefault();
+
+    const email    = document.getElementById('login-email').value.trim().toLowerCase();
+    const password = document.getElementById('login-password').value;
+
+    const account = window.db.accounts.find(a =>
+        a.email === email && a.password === password && a.verified === true
+    );
+
+    if (account) {
+        localStorage.setItem('auth_token', email);
+        setAuthState(true, account);
+        document.getElementById('login-form').reset();
+        showToast(`Welcome back, ${account.firstName}!`, 'success');
+        navigateTo('#/profile');
+    } else {
+        showToast('Invalid email/password, or email not verified.', 'error');
+    }
+}
+
+// ============================================
+// PHASE 3-E: LOGOUT
+// ============================================
+
+function handleLogout(e) {
+    e.preventDefault();
+    localStorage.removeItem('auth_token');
+    setAuthState(false);
+    showToast('Logged out successfully.', 'info');
+    navigateTo('#/');
+}
+
+// ============================================
+// INITIALIZATION (DOMContentLoaded)
+// ============================================
+
 document.addEventListener('DOMContentLoaded', () => {
+
+    // --- Restore session from localStorage ---
     const authToken = localStorage.getItem('auth_token');
-    
     if (authToken) {
-        console.log('Found existing auth token:', authToken);
-        
-        // Find the user
-        const user = window.db.accounts.find(acc => acc.email === authToken);
-        
+        const user = window.db.accounts.find(a => a.email === authToken);
         if (user && user.verified) {
-            console.log('Auto-login:', user);
             setAuthState(true, user);
         } else {
-            console.log('Invalid token, clearing...');
             localStorage.removeItem('auth_token');
         }
     }
+
+    // --- Wire up forms ---
+    document.getElementById('register-form').addEventListener('submit', handleRegister);
+    document.getElementById('login-form').addEventListener('submit', handleLogin);
+    document.getElementById('verify-btn').addEventListener('click', handleVerify);
+    document.getElementById('logout-btn').addEventListener('click', handleLogout);
+
+    // Admin forms
+    document.getElementById('employee-form').addEventListener('submit', handleEmployeeSubmit);
+    document.getElementById('account-form').addEventListener('submit', handleAccountSubmit);
+    document.getElementById('department-form').addEventListener('submit', handleDepartmentSubmit);
+
+    // Admin "+" buttons
+    document.getElementById('add-employee-btn').addEventListener('click', () => showEmployeeForm());
+    document.getElementById('add-account-btn').addEventListener('click', () => showAccountForm());
+    document.getElementById('add-department-btn').addEventListener('click', () => showDepartmentForm());
+
+    // Request modal
+    document.getElementById('new-request-form').addEventListener('submit', handleRequestSubmit);
+    document.getElementById('add-item-btn').addEventListener('click', addRequestItem);
+
+    // Delegate remove-item clicks
+    document.getElementById('request-items-container').addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-item-btn')) {
+            const items = document.querySelectorAll('.request-item');
+            if (items.length > 1) {
+                e.target.closest('.request-item').remove();
+            } else {
+                showToast('At least one item is required.', 'warning');
+            }
+        }
+    });
+
+    // --- Routing init ---
+    if (!window.location.hash) {
+        window.location.hash = '#/';
+    }
+    handleRouting();
+
+    console.log('✅ App initialized');
 });
